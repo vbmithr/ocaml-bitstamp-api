@@ -1,0 +1,14 @@
+OASISFormat: 0.3
+Name: bitstamp-api
+Version: 0.1
+Synopsis: Bitstamp API library
+Authors: Vincent Bernardoff <vb@luminar.eu.org>
+License: ISC
+Plugins: META (0.3), DevFiles (0.3)
+BuildTools: ocamlbuild
+
+Library bitstamp
+  Path: lib
+  Modules: Bitstamp, Bitstamp_j, Bitstamp_t
+  BuildDepends: atdgen, cohttp.lwt, cryptokit
+  CompiledObject: best
