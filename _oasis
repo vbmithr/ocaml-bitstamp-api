@@ -9,6 +9,12 @@ BuildTools: ocamlbuild
 
 Library bitstamp
   Path: lib
-  Modules: Bitstamp, Bitstamp_j, Bitstamp_t
-  BuildDepends: atdgen, cohttp.lwt, cryptokit
+  Modules: Bitstamp, Bitstamp_j, Bitstamp_t, Bitstamp_hl, Bitstamp_hl_b, Bitstamp_hl_t
+  BuildDepends: atdgen, cohttp.lwt, cryptokit, lwt.syntax
+  CompiledObject: best
+
+Executable all_transactions
+  Path: src
+  MainIs: all_transactions.ml
+  BuildDepends: bitstamp
   CompiledObject: best

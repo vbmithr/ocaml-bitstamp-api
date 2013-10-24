@@ -1,8 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: 0de70c35044d4127d24882c150d94332)
+# DO NOT EDIT (digest: 3f07148c6e6ba4e3e3044c09743b0ad7)
 version = "0.1"
 description = "Bitstamp API library"
-requires = "atdgen cohttp.lwt cryptokit"
+requires = "atdgen cohttp.lwt cryptokit lwt.syntax"
 archive(byte) = "bitstamp.cma"
 archive(byte, plugin) = "bitstamp.cma"
 archive(native) = "bitstamp.cmxa"

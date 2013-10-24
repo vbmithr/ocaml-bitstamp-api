@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 57cb4ab9600a529743ab989f5b0d0504)
+# DO NOT EDIT (digest: b52d17ed39f26e9a2e66297709620b8a)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -18,4 +18,18 @@
 <lib/*.ml{,i}>: pkg_atdgen
 <lib/*.ml{,i}>: pkg_cohttp.lwt
 <lib/*.ml{,i}>: pkg_cryptokit
+<lib/*.ml{,i}>: pkg_lwt.syntax
+# Executable all_transactions
+<src/all_transactions.{native,byte}>: use_bitstamp
+<src/all_transactions.{native,byte}>: pkg_atdgen
+<src/all_transactions.{native,byte}>: pkg_cohttp.lwt
+<src/all_transactions.{native,byte}>: pkg_cryptokit
+<src/all_transactions.{native,byte}>: pkg_lwt.syntax
+<src/*.ml{,i}>: use_bitstamp
+<src/*.ml{,i}>: pkg_atdgen
+<src/*.ml{,i}>: pkg_cohttp.lwt
+<src/*.ml{,i}>: pkg_cryptokit
+<src/*.ml{,i}>: pkg_lwt.syntax
 # OASIS_STOP
+<src/*.*>: syntax_camlp4o
+true: annot
