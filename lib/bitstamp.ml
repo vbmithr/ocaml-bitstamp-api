@@ -1,12 +1,10 @@
-open Bitstamp_t
-open Bitstamp_j
+open Lwt
+
+open Types
 
 module C = Cohttp
 module CU = Cohttp_lwt_unix
 module CB = Cohttp_lwt_body
-
-let (>>=) = Lwt.(>>=)
-let (>|=) = Lwt.(>|=)
 
 let base_uri = "https://www.bitstamp.net/api/"
 let mk_uri section = base_uri ^ section |> Uri.of_string
@@ -15,28 +13,22 @@ let mk_uri section = base_uri ^ section |> Uri.of_string
 
 let get endpoint params type_of_string =
   let uri = mk_uri endpoint in
-  CU.Client.get
-    Uri.(with_query' uri params)
-    >>= function
-    | None -> Lwt.return (`Error "Cohttp returned None")
-    | Some (_, body) ->
-      body
-    |> CB.string_of_body
-    >|= fun s -> try `Ok (type_of_string s) with _ -> `Error s
+  CU.Client.get Uri.(with_query' uri params) >>= fun (resp, body) ->
+  CB.to_string body >|= type_of_string
 
-let ticker () = get "ticker/" [] ticker_of_string
+let ticker () = get "ticker/" [] Ticker.of_string
 
 let order_book ?(group=true) () =
-  get "order_book/" ["group", if group then "1" else "0"] order_book_of_string
+  get "order_book/" ["group", if group then "1" else "0"] Order_book.of_string
 
 let transactions ?(offset=0) ?(limit=100) ?(sort="desc") () =
   let params = ["offset", offset |> string_of_int;
                 "limit", limit |> string_of_int;
                 "sort", sort
                ] in
-  get "transactions/" params transactions_of_string
+  get "transactions/" params Transaction.ts_of_string
 
-let eur_usd () = get "eur_usd/" [] eur_usd_of_string
+let eur_usd () = get "eur_usd/" [] Eur_usd.of_string
 
 (* POST / authentified *)
 
@@ -53,10 +45,10 @@ let mk_signature () =
   let open Cryptokit in
   let nonce = Printf.sprintf "%.0f" (Unix.time ()) in
   let msg = nonce ^ !id ^ !key in
-  let hash = Cryptokit.MAC.hmac_sha256 !secret in
-  let res_bin = Cryptokit.hash_string hash msg in
+  let hash = MAC.hmac_sha256 !secret in
+  let res_bin = hash_string hash msg in
   let res_hexa =
-  Cryptokit.(transform_string (Hexa.encode ()) res_bin)
+  transform_string (Hexa.encode ()) res_bin
   |> String.uppercase in
   nonce, res_hexa
 
@@ -70,13 +62,11 @@ let post endpoint params type_of_json =
        @ params)
   in
   CU.Client.post_form ~params uri
-  >>= function
-  | None -> Lwt.return (`Error "Cohttp returned None")
-  | Some (resp, body) ->
-    CB.string_of_body body
-    >|= fun s -> try `Ok (type_of_json s) with _ -> `Error s
+  >>= fun (resp, body) ->
+  CB.to_string body >|= fun s ->
+  try `Ok (type_of_json s) with _ -> `Error s
 
-let balance () = post "balance/" [] balance_of_string
+let balance () = post "balance/" [] Balance.of_string
 
 let user_transactions ?(offset=0) ?(limit=100) ?(sort="desc") () =
   let params = [
@@ -84,29 +74,29 @@ let user_transactions ?(offset=0) ?(limit=100) ?(sort="desc") () =
     "limit", string_of_int limit;
     "sort", sort
   ] in
-  post "user_transactions/" params user_transactions_of_string
+  post "user_transactions/" params User_transaction.ts_of_string
 
-let open_orders () = post "open_orders/" [] orders_of_string
+let open_orders () = post "open_orders/" [] Order.ts_of_string
 
 let cancel_order id =
   post "cancel_order/" ["id", id] (fun s -> s = "true")
 
 let sell ~price ~amount =
   post "sell/" ["price", string_of_float price;
-                "amount", string_of_float amount] order_of_string
+                "amount", string_of_float amount] Order.of_string
 
 let buy ~price ~amount =
   post "buy/" ["price", string_of_float price;
-               "amount", string_of_float amount] order_of_string
+               "amount", string_of_float amount] Order.of_string
 
 let check_code code =
-  post "check_code/" ["code", code] code_of_string
+  post "check_code/" ["code", code] Code.of_string
 
 let redeem_code code =
-  post "redeem_code/" ["code", code] code_of_string
+  post "redeem_code/" ["code", code] Code.of_string
 
 let withdrawal_requests () =
-  post "withdrawal_requests/" [] withdrawal_requests_of_string
+  post "withdrawal_requests/" [] Withdrawal_request.ts_of_string
 
 let bitcoin_withdrawal ~amount ~address =
   post "bitcoin_withdrawal/" ["amount", string_of_float amount;
@@ -125,4 +115,4 @@ let ripple_deposit_address () =
   post "ripple_deposit_address/" [] (fun s -> s)
 
 let unconfirmed_deposits () =
-  post "unconfirmed_btc/" [] unconfirmeds_of_string
+  post "unconfirmed_btc/" [] Unconfirmed.ts_of_string
