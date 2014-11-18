@@ -1,0 +1,7 @@
+PKG lwt lwt.syntax oUnit async async_extra ppx_deriving ppx_deriving_protobuf ppx_deriving_protobuf.runtime bitstring atdgen cohttp.lwt cryptokit
+
+S lib
+S src
+B _build/lib
+B _build/examples
+FLG -safe-string

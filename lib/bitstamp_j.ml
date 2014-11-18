@@ -469,7 +469,7 @@ let read_ticker = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x7f then Ag_oj_run.missing_fields [| !bits0 |] [| "high"; "last"; "timestamp"; "bid"; "volume"; "low"; "ask" |];
+        if !bits0 <> 0x7f then Ag_oj_run.missing_fields p [| !bits0 |] [| "high"; "last"; "timestamp"; "bid"; "volume"; "low"; "ask" |];
         Ag_oj_run.identity x
       )
 )
@@ -709,7 +709,7 @@ let read_order_book = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x7 then Ag_oj_run.missing_fields [| !bits0 |] [| "timestamp"; "bids"; "asks" |];
+        if !bits0 <> 0x7 then Ag_oj_run.missing_fields p [| !bits0 |] [| "timestamp"; "bids"; "asks" |];
         Ag_oj_run.identity x
       )
 )
@@ -947,7 +947,7 @@ let read_transaction = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0xf then Ag_oj_run.missing_fields [| !bits0 |] [| "date"; "tid"; "price"; "amount" |];
+        if !bits0 <> 0xf then Ag_oj_run.missing_fields p [| !bits0 |] [| "date"; "tid"; "price"; "amount" |];
         Ag_oj_run.identity x
       )
 )
@@ -1129,7 +1129,7 @@ let read_eur_usd = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x3 then Ag_oj_run.missing_fields [| !bits0 |] [| "sell"; "buy" |];
+        if !bits0 <> 0x3 then Ag_oj_run.missing_fields p [| !bits0 |] [| "sell"; "buy" |];
         Ag_oj_run.identity x
       )
 )
@@ -1529,7 +1529,7 @@ let read_balance = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x7f then Ag_oj_run.missing_fields [| !bits0 |] [| "usd_balance"; "btc_balance"; "usd_reserved"; "btc_reserved"; "usd_available"; "btc_available"; "fee" |];
+        if !bits0 <> 0x7f then Ag_oj_run.missing_fields p [| !bits0 |] [| "usd_balance"; "btc_balance"; "usd_reserved"; "btc_reserved"; "usd_available"; "btc_available"; "fee" |];
         Ag_oj_run.identity x
       )
 )
@@ -1917,7 +1917,7 @@ let read_user_transaction = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x7f then Ag_oj_run.missing_fields [| !bits0 |] [| "datetime"; "id"; "type_"; "usd"; "btc"; "fee"; "order_id" |];
+        if !bits0 <> 0x7f then Ag_oj_run.missing_fields p [| !bits0 |] [| "datetime"; "id"; "type_"; "usd"; "btc"; "fee"; "order_id" |];
         Ag_oj_run.identity x
       )
 )
@@ -2237,7 +2237,7 @@ let read_order = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x1f then Ag_oj_run.missing_fields [| !bits0 |] [| "id"; "datetime"; "type_"; "price"; "amount" |];
+        if !bits0 <> 0x1f then Ag_oj_run.missing_fields p [| !bits0 |] [| "id"; "datetime"; "type_"; "price"; "amount" |];
         Ag_oj_run.identity x
       )
 )
@@ -2429,7 +2429,7 @@ let read_code = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x3 then Ag_oj_run.missing_fields [| !bits0 |] [| "usd"; "btc" |];
+        if !bits0 <> 0x3 then Ag_oj_run.missing_fields p [| !bits0 |] [| "usd"; "btc" |];
         Ag_oj_run.identity x
       )
 )
@@ -2763,7 +2763,7 @@ let read_withdrawal = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x3f then Ag_oj_run.missing_fields [| !bits0 |] [| "id"; "datetime"; "type_"; "amount"; "status"; "data" |];
+        if !bits0 <> 0x3f then Ag_oj_run.missing_fields p [| !bits0 |] [| "id"; "datetime"; "type_"; "amount"; "status"; "data" |];
         Ag_oj_run.identity x
       )
 )
@@ -2987,7 +2987,7 @@ let read_unconfirmed = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x7 then Ag_oj_run.missing_fields [| !bits0 |] [| "amount"; "address"; "confirmations" |];
+        if !bits0 <> 0x7 then Ag_oj_run.missing_fields p [| !bits0 |] [| "amount"; "address"; "confirmations" |];
         Ag_oj_run.identity x
       )
 )
