@@ -17,11 +17,8 @@ let get endpoint params type_of_string =
   let uri = mk_uri endpoint in
   CU.Client.get
     Uri.(with_query' uri params)
-    >>= function
-    | None -> Lwt.return (`Error "Cohttp returned None")
-    | Some (_, body) ->
-      body
-    |> CB.string_of_body
+    >>= function (_, body) -> body
+    |> CB.to_string
     >|= fun s -> try `Ok (type_of_string s) with _ -> `Error s
 
 let ticker () = get "ticker/" [] ticker_of_string
@@ -71,9 +68,8 @@ let post endpoint params type_of_json =
   in
   CU.Client.post_form ~params uri
   >>= function
-  | None -> Lwt.return (`Error "Cohttp returned None")
-  | Some (resp, body) ->
-    CB.string_of_body body
+  | (_, body) ->
+    CB.to_string body
     >|= fun s -> try `Ok (type_of_json s) with _ -> `Error s
 
 let balance () = post "balance/" [] balance_of_string

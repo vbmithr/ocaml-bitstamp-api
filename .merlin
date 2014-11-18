@@ -1,0 +1,7 @@
+PKG lwt lwt.syntax oUnit atdgen cohttp.lwt cryptokit
+
+S lib
+S src
+B _build/lib
+B _build/examples
+FLG -safe-string
