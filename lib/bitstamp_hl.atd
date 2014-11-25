@@ -1,6 +1,0 @@
-type transaction = {
-  tid: int;
-  datetime: float;
-  price: float;
-  amount: float
-}

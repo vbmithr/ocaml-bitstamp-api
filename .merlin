@@ -8,4 +8,6 @@ PKG lwt
 PKG cohttp.lwt
 PKG yojson
 PKG ppx_deriving_yojson
-PKG cryptokit
+PKG nocrypto
+PKG cstruct
+PKG hex

@@ -35,15 +35,15 @@ module Ticker = struct
       timestamp: string;
       bid: string;
       volume: string;
+      vwap: string;
       low: string;
-      ask: string
+      ask: string;
     } [@@deriving yojson]
   end
 
   include T
   include Stringable.Of_jsonable(T)
 end
-
 
 module Order_book = struct
   module T = struct

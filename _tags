@@ -1,4 +1,11 @@
 true: debug, bin_annot
 <lib>: include
 <src>: include
-<lib/*.*>: package(ppx_deriving.std), package(ppx_deriving_yojson), package(lwt), package(cohttp.lwt), package(cryptokit)
+<**/*.*>: package(ppx_deriving.std), \
+	   package(ppx_deriving_yojson), \
+	   package(lwt.ppx), \
+	   package(lwt.unix), \
+	   package(cohttp.lwt), \
+	   package(nocrypto), \
+	   package(cstruct), \
+	   package(hex)

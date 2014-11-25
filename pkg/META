@@ -1,6 +1,6 @@
 version = "0.1"
 description = "Bitstamp API library"
-requires = "cohttp.lwt cryptokit lwt ppx_deriving.std ppx_deriving_yojson"
+requires = "ppx_deriving_yojson.runtime cohttp.lwt hex cstruct nocrypto"
 archive(byte) = "bitstamp.cma"
 archive(byte, plugin) = "bitstamp.cma"
 archive(native) = "bitstamp.cmxa"
