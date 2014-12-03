@@ -1,0 +1,2 @@
+* Make it impossible to manipulate invalid BTC/Ripple addresses (=
+  make a custom datatype for them that checks their validity)

@@ -1,9 +1,23 @@
 version = "0.1"
 description = "Bitstamp API library"
-requires = "ppx_deriving_yojson.runtime cohttp.lwt hex cstruct nocrypto"
-archive(byte) = "bitstamp.cma"
-archive(byte, plugin) = "bitstamp.cma"
-archive(native) = "bitstamp.cmxa"
-archive(native, plugin) = "bitstamp.cmxs"
-exists_if = "bitstamp.cma"
+requires = "bitstamp.core"
+requires(toploop) = "bitstamp.top"
 
+package "core" (
+  requires = "ppx_deriving_yojson.runtime cohttp.lwt hex cstruct nocrypto"
+  archive(byte) = "bitstamp.cma"
+  archive(byte, plugin) = "bitstamp.cma"
+  archive(native) = "bitstamp.cmxa"
+  archive(native, plugin) = "bitstamp.cmxs"
+  exists_if = "bitstamp.cma"
+)
+
+package "top" (
+  description = "Toplevel printers for the Bitstamp API"
+  requires = "bitstamp.core"
+  archive(byte) = "bitstamp_top.cma"
+  archive(byte, plugin) = "bitstamp_top.cma"
+  archive(native) = "bitstamp_top.cmxa"
+  archive(native, plugin) = "bitstamp_top.cmxs"
+  exists_if = "bitstamp_top.cma"
+)
