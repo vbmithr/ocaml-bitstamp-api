@@ -1,6 +1,5 @@
 open Lwt
 
-module C = Cohttp
 module CU = Cohttp_lwt_unix
 module CB = Cohttp_lwt_body
 
@@ -12,7 +11,11 @@ let mk_uri section = Uri.of_string @@ base_uri ^ section
 let get endpoint params type_of_string =
   let uri = mk_uri endpoint in
   CU.Client.get Uri.(with_query' uri params) >>= fun (resp, body) ->
-  CB.to_string body >|= type_of_string
+  CB.to_string body >>= fun s ->
+  try
+    type_of_string s |> function | `Ok r -> return r
+                                 | `Error reason -> fail @@ Failure reason
+  with exn -> fail exn
 
 (* POST / authentified *)
 
@@ -35,7 +38,7 @@ module Credentials = struct
   end
 end
 
-let post c endpoint params type_of_json =
+let post c endpoint params type_of_string =
   let uri = mk_uri endpoint in
   let nonce, sign = Credentials.Signature.make c in
   let params = Cohttp.Header.of_list
@@ -44,7 +47,11 @@ let post c endpoint params type_of_json =
         "nonce", nonce]
        @ params)
   in CU.Client.post_form ~params uri >>= fun (resp, body) ->
-  CB.to_string body >|= type_of_json
+  CB.to_string body >>= fun s ->
+  try
+    type_of_string s |> function | `Ok r -> return r
+                                 | `Error reason -> fail @@ Failure reason
+  with exn -> fail exn
 
 module type JSONABLE = sig
   type t
@@ -112,9 +119,7 @@ module Ticker = struct
       low = float_of_string r.Raw.low;
       ask = float_of_string r.Raw.ask;
     }
-  let ticker () = Raw.ticker () >|= function
-    | `Ok r -> `Ok (of_raw r)
-    | `Error _ as e -> e
+  let ticker () = Raw.ticker () >|= of_raw
 end
 
 module Order_book = struct
@@ -151,9 +156,7 @@ module Order_book = struct
       bids = List.map pa_of_list r.Raw.bids;
       asks = List.map pa_of_list r.Raw.asks;
     }
-  let orders ?(group=true) () = Raw.orders ~group () >|= function
-    | `Ok r -> `Ok (of_raw r)
-    | `Error _ as e -> e
+  let orders ?(group=true) () = Raw.orders ~group () >|= of_raw
 end
 
 module Transaction = struct
@@ -195,17 +198,15 @@ module Transaction = struct
     }
 
   let transactions ?(offset=0) ?(limit=100) ?(sort="desc") () =
-    Raw.transactions ~offset ~limit ~sort ()  >|= function
-    | `Ok r -> `Ok (List.map of_raw r)
-    | `Error _ as e -> e
+    Raw.transactions ~offset ~limit ~sort () >|= fun ts -> List.map of_raw ts
 
   let all_bitstamp_transactions ?(waitfor=1.) ?(offset=0) ?(limit=1000) oc =
     let rec inner offset =
       Lwt_log.notice_f "offset = %d" offset >>= fun () ->
       Lwt_unix.sleep waitfor >>= fun () ->
       transactions ~offset ~limit () >>= function
-      | `Ok ts -> if ts = [] then raise End_of_file else inner (offset + limit);
-      | `Error s -> failwith s
+      | [] -> fail End_of_file
+      | ts -> inner (offset + limit)
     in
     (try%lwt inner 0 with
      | End_of_file -> Lwt.return_unit
@@ -233,9 +234,7 @@ module Eur_usd = struct
     { sell = float_of_string r.Raw.sell;
       buy = float_of_string r.Raw.buy; }
 
-  let conversion_rate () = Raw.conversion_rate () >|= function
-    | `Ok r -> `Ok (of_raw r)
-    | `Error _ as e -> e
+  let conversion_rate () = Raw.conversion_rate () >|= of_raw
 end
 
 module Balance = struct
@@ -272,9 +271,7 @@ module Balance = struct
     btc_available = float_of_string r.Raw.btc_available;
     fee = float_of_string r.Raw.usd_balance; }
 
-  let balance c = Raw.balance c >|= function
-    | `Ok r -> `Ok (of_raw r)
-    | `Error _ as e -> e
+  let balance c = Raw.balance c >|= of_raw
 end
 
 module User_transaction = struct
@@ -324,9 +321,7 @@ module User_transaction = struct
     order_id = r.Raw.order_id; }
 
   let transactions ?(offset=0) ?(limit=100) ?(sort="desc") c =
-    Raw.transactions ~offset ~limit ~sort c >|= function
-    | `Ok r -> `Ok (List.map of_raw r)
-    | `Error _ as e -> e
+    Raw.transactions ~offset ~limit ~sort c >|= List.map of_raw
 end
 
 module Order = struct
@@ -357,7 +352,7 @@ module Order = struct
          "amount", string_of_float amount] of_string
     let cancel c id =
       post c "cancel_order/" ["id", string_of_int id]
-        (function "true" -> `Ok | e -> `Error e)
+        (function "true" -> `Ok () | e -> `Error e)
   end
 
   let type_of_string = function
@@ -374,16 +369,10 @@ module Order = struct
       amount = float_of_string r.Raw.amount;
     }
 
-  let open_orders c = Raw.open_orders c >|= function
-    | `Ok r -> `Ok (List.map of_raw r)
-    | `Error _ as e -> e
+  let open_orders c = Raw.open_orders c >|= List.map of_raw
 
-  let buy c ~price ~amount = Raw.buy c ~price ~amount >|= function
-    | `Ok r -> `Ok (of_raw r)
-    | `Error _ as e -> e
-  let sell c ~price ~amount = Raw.sell c ~price ~amount >|= function
-    | `Ok r -> `Ok (of_raw r)
-    | `Error _ as e -> e
+  let buy c ~price ~amount = Raw.buy c ~price ~amount >|= of_raw
+  let sell c ~price ~amount = Raw.sell c ~price ~amount >|= of_raw
   let cancel = Raw.cancel
 end
 
@@ -417,7 +406,7 @@ module Withdraw = struct
         ["amount", string_of_float amount;
          "address", address;
          "currency", currency
-        ] (function "true" -> `Ok | e -> `Error e)
+        ] (function "true" -> `Ok () | e -> `Error e)
   end
 
   let type_of_int = function
@@ -445,9 +434,7 @@ module Withdraw = struct
       data = r.Raw.data;
     }
 
-  let requests c = Raw.requests c >|= function
-    | `Ok r -> `Ok (List.map of_raw r)
-    | `Error _ as e -> e
+  let requests c = Raw.requests c >|= List.map of_raw
   let btc = Raw.btc
   let ripple = Raw.ripple
 end
@@ -466,8 +453,9 @@ module Deposit = struct
     include Stringable.Of_jsonable(T)
 
     let unconfirmeds c = post c "unconfirmed_btc/" [] ts_of_string
-    let btc_address c = post c "bitcoin_deposit_address/" [] (fun s -> s)
-    let ripple_address c = post c "ripple_deposit_address/" [] (fun s -> s)
+    (* TODO: encapsulate address and Base58Check it. *)
+    let btc_address c = post c "bitcoin_deposit_address/" [] (fun s -> `Ok s)
+    let ripple_address c = post c "ripple_deposit_address/" [] (fun s -> `Ok s)
   end
 
   type t = {
@@ -480,9 +468,7 @@ module Deposit = struct
     { amount = float_of_string r.Raw.amount;
       address = r.Raw.address;
       confirmations = int_of_string r.Raw.confirmations; }
-  let unconfirmeds c = Raw.unconfirmeds c >|= function
-    | `Ok r -> `Ok (List.map of_raw r)
-    | `Error _ as e -> e
+  let unconfirmeds c = Raw.unconfirmeds c >|= List.map of_raw
   let btc_address = Raw.btc_address
   let ripple_address = Raw.ripple_address
 end

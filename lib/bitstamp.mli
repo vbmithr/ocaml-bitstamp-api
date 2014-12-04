@@ -13,7 +13,7 @@ module Ticker :
       ask : float;
     } [@@deriving show]
 
-    val ticker : unit -> [> `Error of string | `Ok of t ] Lwt.t
+    val ticker : unit -> t Lwt.t
   end
 
 module Order_book :
@@ -26,7 +26,7 @@ module Order_book :
       asks : order list;
     } [@@deriving show]
 
-    val orders : ?group:bool -> unit -> [> `Error of string | `Ok of t ] Lwt.t
+    val orders : ?group:bool -> unit -> t Lwt.t
   end
 
 module Transaction :
@@ -39,7 +39,7 @@ module Transaction :
     } [@@deriving show]
 
     val transactions : ?offset:int -> ?limit:int -> ?sort:string -> unit ->
-      [> `Error of string | `Ok of t list ] Lwt.t
+      t list Lwt.t
   end
 
 module Eur_usd :
@@ -49,7 +49,7 @@ module Eur_usd :
       buy : float;
     } [@@deriving show]
 
-    val conversion_rate : unit -> [> `Error of string | `Ok of t ] Lwt.t
+    val conversion_rate : unit -> t Lwt.t
   end
 
 (** {1 Private API} *)
@@ -72,7 +72,7 @@ module Balance :
       fee : float;
     } [@@deriving show]
 
-    val balance : Credentials.t -> [> `Error of string | `Ok of t ] Lwt.t
+    val balance : Credentials.t -> t Lwt.t
   end
 
 module User_transaction :
@@ -88,8 +88,8 @@ module User_transaction :
       order_id : int;
     } [@@deriving show]
 
-    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> Credentials.t ->
-      [> `Error of string | `Ok of t list ] Lwt.t
+    val transactions : ?offset:int -> ?limit:int -> ?sort:string ->
+      Credentials.t -> t list Lwt.t
   end
 
 module Order :
@@ -103,15 +103,10 @@ module Order :
       amount : float;
     } [@@deriving show]
 
-    val open_orders : Credentials.t -> [> `Error of string | `Ok of t list ] Lwt.t
-
-    val buy : Credentials.t -> price:float -> amount:float ->
-      [ `Error of string | `Ok of t ] Lwt.t
-
-    val sell : Credentials.t -> price:float -> amount:float ->
-      [ `Error of string | `Ok of t ] Lwt.t
-
-    val cancel : Credentials.t -> int -> [`Ok | `Error of string] Lwt.t
+    val open_orders : Credentials.t -> t list Lwt.t
+    val buy : Credentials.t -> price:float -> amount:float -> t Lwt.t
+    val sell : Credentials.t -> price:float -> amount:float -> t Lwt.t
+    val cancel : Credentials.t -> int -> unit Lwt.t
   end
 
 module Withdraw :
@@ -125,14 +120,10 @@ module Withdraw :
       data : string;
     } [@@deriving show]
 
-    val requests :
-      Credentials.t -> [> `Error of string | `Ok of t list ] Lwt.t
-
-    val btc : Credentials.t -> amount:float -> address:string ->
-      [`Ok of int | `Error of string] Lwt.t
-
+    val requests : Credentials.t -> t list Lwt.t
+    val btc : Credentials.t -> amount:float -> address:string -> int Lwt.t
     val ripple : Credentials.t -> amount:float -> address:string ->
-      currency:string -> [`Ok | `Error of string] Lwt.t
+      currency:string -> unit Lwt.t
   end
 
 module Deposit :
@@ -143,10 +134,7 @@ module Deposit :
       confirmations : int;
     } [@@deriving show]
 
-    val unconfirmeds :
-      Credentials.t -> [> `Error of string | `Ok of t list ] Lwt.t
-
+    val unconfirmeds : Credentials.t -> t list Lwt.t
     val btc_address : Credentials.t -> string Lwt.t
-
     val ripple_address : Credentials.t -> string Lwt.t
   end
