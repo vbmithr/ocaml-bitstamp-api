@@ -44,12 +44,13 @@ module Http_lwt(IO: Cohttp.S.IO
   let post c endpoint params type_of_string =
     let uri = mk_uri endpoint in
     let nonce, sign = Credentials.Signature.make c in
-    let params = Cohttp.Header.of_list
-        (["key", c.Credentials.key;
-          "signature", sign;
-          "nonce", nonce]
+    let params =
+        (["key", [c.Credentials.key];
+          "signature", [sign];
+          "nonce", [nonce]]
          @ params)
-    in Client.post_form ~params uri >>= fun (resp, body) ->
+    in
+    Client.post_form ~params uri >>= fun (resp, body) ->
     CB.to_string body >>= fun s ->
     try
       type_of_string s |> function | `Ok r -> return r
