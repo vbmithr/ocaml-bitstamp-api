@@ -1,6 +1,30 @@
-(** {1 Public API} *)
+val mk_uri : string -> Uri.t
 
-module Ticker :
+module Credentials : sig
+  type t = private {
+    id: string; key: string; secret: string;
+  }
+
+  val make : id:string -> key:string -> secret:string -> t
+
+  module Signature : sig
+    val make : t -> string * string
+  end
+end
+
+module type HTTP_CLIENT = functor (IO: Cohttp.S.IO) -> sig
+  val get : string -> (string * string) list ->
+    (string -> [< `Error of string | `Ok of 'a ]) -> 'a IO.t
+
+  val post : Credentials.t -> string -> (string * string) list ->
+    (string -> [< `Error of string | `Ok of 'a ]) -> 'a IO.t
+end
+
+module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
+
+  (** {1 Public API} *)
+
+  module Ticker :
   sig
     type t = private {
       high : float;
@@ -13,10 +37,10 @@ module Ticker :
       ask : float;
     } [@@deriving show]
 
-    val ticker : unit -> t Lwt.t
+    val ticker : unit -> t IO.t
   end
 
-module Order_book :
+  module Order_book :
   sig
     type order = private { price : float; amount : float; } [@@deriving show]
 
@@ -26,10 +50,10 @@ module Order_book :
       asks : order list;
     } [@@deriving show]
 
-    val orders : ?group:bool -> unit -> t Lwt.t
+    val orders : ?group:bool -> unit -> t IO.t
   end
 
-module Transaction :
+  module Transaction :
   sig
     type t = private {
       date : float;
@@ -38,29 +62,23 @@ module Transaction :
       amount : float;
     } [@@deriving show]
 
-    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> unit ->
-      t list Lwt.t
+    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> unit ->  t list IO.t
   end
 
-module Eur_usd :
+  module Eur_usd :
   sig
     type t = private {
       sell : float;
       buy : float;
     } [@@deriving show]
 
-    val conversion_rate : unit -> t Lwt.t
+    val conversion_rate : unit -> t IO.t
   end
 
-(** {1 Private API} *)
+  (** {1 Private API} *)
 
-module Credentials : sig
-  type t
 
-  val make : id:string -> key:string -> secret:string -> t
-end
-
-module Balance :
+  module Balance :
   sig
     type t = private {
       usd_balance : float;
@@ -72,10 +90,10 @@ module Balance :
       fee : float;
     } [@@deriving show]
 
-    val balance : Credentials.t -> t Lwt.t
+    val balance : Credentials.t -> t IO.t
   end
 
-module User_transaction :
+  module User_transaction :
   sig
     val type_of_string : string -> [> `Deposit | `Trade | `Withdrawal ]
     type t = private {
@@ -88,11 +106,10 @@ module User_transaction :
       order_id : int;
     } [@@deriving show]
 
-    val transactions : ?offset:int -> ?limit:int -> ?sort:string ->
-      Credentials.t -> t list Lwt.t
+    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> Credentials.t -> t list IO.t
   end
 
-module Order :
+  module Order :
   sig
     val type_of_string : string -> [> `Buy | `Sell ]
     type t = private {
@@ -103,13 +120,13 @@ module Order :
       amount : float;
     } [@@deriving show]
 
-    val open_orders : Credentials.t -> t list Lwt.t
-    val buy : Credentials.t -> price:float -> amount:float -> t Lwt.t
-    val sell : Credentials.t -> price:float -> amount:float -> t Lwt.t
-    val cancel : Credentials.t -> int -> unit Lwt.t
+    val open_orders : Credentials.t -> t list IO.t
+    val buy : Credentials.t -> price:float -> amount:float -> t IO.t
+    val sell : Credentials.t -> price:float -> amount:float -> t IO.t
+    val cancel : Credentials.t -> int -> unit IO.t
   end
 
-module Withdraw :
+  module Withdraw :
   sig
     type t = private {
       id : int;
@@ -120,13 +137,12 @@ module Withdraw :
       data : string;
     } [@@deriving show]
 
-    val requests : Credentials.t -> t list Lwt.t
-    val btc : Credentials.t -> amount:float -> address:string -> int Lwt.t
-    val ripple : Credentials.t -> amount:float -> address:string ->
-      currency:string -> unit Lwt.t
+    val requests : Credentials.t -> t list IO.t
+    val btc : Credentials.t -> amount:float -> address:string -> int IO.t
+    val ripple : Credentials.t -> amount:float -> address:string -> currency:string -> unit IO.t
   end
 
-module Deposit :
+  module Deposit :
   sig
     type t = private {
       amount : float;
@@ -134,7 +150,8 @@ module Deposit :
       confirmations : int;
     } [@@deriving show]
 
-    val unconfirmeds : Credentials.t -> t list Lwt.t
-    val btc_address : Credentials.t -> string Lwt.t
-    val ripple_address : Credentials.t -> string Lwt.t
+    val unconfirmeds : Credentials.t -> t list IO.t
+    val btc_address : Credentials.t -> string IO.t
+    val ripple_address : Credentials.t -> string IO.t
   end
+end
