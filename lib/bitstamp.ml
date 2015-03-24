@@ -21,12 +21,14 @@ module Credentials = struct
   end
 end
 
-module type HTTP_CLIENT = functor (IO: Cohttp.S.IO) -> sig
+module type HTTP_CLIENT = sig
+  include Cohttp.S.IO
+
   val get : string -> (string * string) list ->
-    (string -> [< `Error of string | `Ok of 'a ]) -> 'a IO.t
+    (string -> [< `Error of string | `Ok of 'a ]) -> 'a t
 
   val post : Credentials.t -> string -> (string * string) list ->
-    (string -> [< `Error of string | `Ok of 'a ]) -> 'a IO.t
+    (string -> [< `Error of string | `Ok of 'a ]) -> 'a t
 end
 
 module type JSONABLE = sig
@@ -59,10 +61,8 @@ module Stringable = struct
   end
 end
 
-module API (H: HTTP_CLIENT) (IO: Cohttp.S.IO) = struct
-  module Http_client = H(IO)
-  open IO
-  open Http_client
+module API (H: HTTP_CLIENT) = struct
+  open H
 
   module Ticker = struct
     module Raw = struct

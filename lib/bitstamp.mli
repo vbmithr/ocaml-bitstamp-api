@@ -12,15 +12,17 @@ module Credentials : sig
   end
 end
 
-module type HTTP_CLIENT = functor (IO: Cohttp.S.IO) -> sig
+module type HTTP_CLIENT = sig
+  include Cohttp.S.IO
+
   val get : string -> (string * string) list ->
-    (string -> [< `Error of string | `Ok of 'a ]) -> 'a IO.t
+    (string -> [< `Error of string | `Ok of 'a ]) -> 'a t
 
   val post : Credentials.t -> string -> (string * string) list ->
-    (string -> [< `Error of string | `Ok of 'a ]) -> 'a IO.t
+    (string -> [< `Error of string | `Ok of 'a ]) -> 'a t
 end
 
-module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
+module API(H: HTTP_CLIENT) : sig
 
   (** {1 Public API} *)
 
@@ -37,7 +39,7 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       ask : float;
     } [@@deriving show]
 
-    val ticker : unit -> t IO.t
+    val ticker : unit -> t H.t
   end
 
   module Order_book :
@@ -50,7 +52,7 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       asks : order list;
     } [@@deriving show]
 
-    val orders : ?group:bool -> unit -> t IO.t
+    val orders : ?group:bool -> unit -> t H.t
   end
 
   module Transaction :
@@ -62,7 +64,7 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       amount : float;
     } [@@deriving show]
 
-    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> unit ->  t list IO.t
+    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> unit ->  t list H.t
   end
 
   module Eur_usd :
@@ -72,7 +74,7 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       buy : float;
     } [@@deriving show]
 
-    val conversion_rate : unit -> t IO.t
+    val conversion_rate : unit -> t H.t
   end
 
   (** {1 Private API} *)
@@ -90,7 +92,7 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       fee : float;
     } [@@deriving show]
 
-    val balance : Credentials.t -> t IO.t
+    val balance : Credentials.t -> t H.t
   end
 
   module User_transaction :
@@ -106,7 +108,7 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       order_id : int;
     } [@@deriving show]
 
-    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> Credentials.t -> t list IO.t
+    val transactions : ?offset:int -> ?limit:int -> ?sort:string -> Credentials.t -> t list H.t
   end
 
   module Order :
@@ -120,10 +122,10 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       amount : float;
     } [@@deriving show]
 
-    val open_orders : Credentials.t -> t list IO.t
-    val buy : Credentials.t -> price:float -> amount:float -> t IO.t
-    val sell : Credentials.t -> price:float -> amount:float -> t IO.t
-    val cancel : Credentials.t -> int -> unit IO.t
+    val open_orders : Credentials.t -> t list H.t
+    val buy : Credentials.t -> price:float -> amount:float -> t H.t
+    val sell : Credentials.t -> price:float -> amount:float -> t H.t
+    val cancel : Credentials.t -> int -> unit H.t
   end
 
   module Withdraw :
@@ -137,9 +139,9 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       data : string;
     } [@@deriving show]
 
-    val requests : Credentials.t -> t list IO.t
-    val btc : Credentials.t -> amount:float -> address:string -> int IO.t
-    val ripple : Credentials.t -> amount:float -> address:string -> currency:string -> unit IO.t
+    val requests : Credentials.t -> t list H.t
+    val btc : Credentials.t -> amount:float -> address:string -> int H.t
+    val ripple : Credentials.t -> amount:float -> address:string -> currency:string -> unit H.t
   end
 
   module Deposit :
@@ -150,8 +152,8 @@ module API(H: HTTP_CLIENT) (IO: Cohttp.S.IO) : sig
       confirmations : int;
     } [@@deriving show]
 
-    val unconfirmeds : Credentials.t -> t list IO.t
-    val btc_address : Credentials.t -> string IO.t
-    val ripple_address : Credentials.t -> string IO.t
+    val unconfirmeds : Credentials.t -> t list H.t
+    val btc_address : Credentials.t -> string H.t
+    val ripple_address : Credentials.t -> string H.t
   end
 end
