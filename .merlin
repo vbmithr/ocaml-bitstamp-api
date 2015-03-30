@@ -11,3 +11,4 @@ PKG ppx_deriving_yojson
 PKG nocrypto
 PKG cstruct
 PKG hex
+PKG async

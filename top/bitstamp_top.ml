@@ -1,13 +1,15 @@
+module B = Bitstamp.API(Bitstamp_lwt)
+
 let printers = [
-  "Bitstamp.Ticker.pp";
-  "Bitstamp.Order_book.pp";
-  "Bitstamp.Transaction.pp";
-  "Bitstamp.Eur_usd.pp";
-  "Bitstamp.Balance.pp";
-  "Bitstamp.User_transaction.pp";
-  "Bitstamp.Order.pp";
-  "Bitstamp.Withdraw.pp";
-  "Bitstamp.Deposit.pp";
+  "B.Ticker.pp";
+  "B.Order_book.pp";
+  "B.Transaction.pp";
+  "B.Eur_usd.pp";
+  "B.Balance.pp";
+  "B.User_transaction.pp";
+  "B.Order.pp";
+  "B.Withdraw.pp";
+  "B.Deposit.pp";
 ]
 
 let eval_string

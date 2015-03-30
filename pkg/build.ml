@@ -8,5 +8,6 @@ let () =
     Pkg.lib ~exts:Exts.module_library "lib/bitstamp";
     Pkg.lib ~exts:Exts.library "top/bitstamp_top";
     Pkg.lib ~exts:Exts.module_library "lib/bitstamp_lwt";
+    Pkg.lib ~exts:Exts.module_library "lib/bitstamp_async";
     Pkg.bin ~auto:true "src/all_transactions"
   ]

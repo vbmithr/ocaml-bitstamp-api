@@ -4,12 +4,30 @@ requires = "bitstamp.core"
 requires(toploop) = "bitstamp.top"
 
 package "core" (
-  requires = "ppx_deriving_yojson.runtime cohttp.lwt hex cstruct nocrypto"
+  requires = "ppx_deriving_yojson.runtime hex cstruct nocrypto"
   archive(byte) = "bitstamp.cma"
   archive(byte, plugin) = "bitstamp.cma"
   archive(native) = "bitstamp.cmxa"
   archive(native, plugin) = "bitstamp.cmxs"
   exists_if = "bitstamp.cma"
+)
+
+package "lwt" (
+  requires = "bitstamp.core cohttp.lwt"
+  archive(byte) = "bitstamp_lwt.cma"
+  archive(byte, plugin) = "bitstamp_lwt.cma"
+  archive(native) = "bitstamp_lwt.cmxa"
+  archive(native, plugin) = "bitstamp_lwt.cmxs"
+  exists_if = "bitstamp_lwt.cma"
+)
+
+package "async" (
+  requires = "bitstamp.core cohttp.async"
+  archive(byte) = "bitstamp_async.cma"
+  archive(byte, plugin) = "bitstamp_async.cma"
+  archive(native) = "bitstamp_async.cmxa"
+  archive(native, plugin) = "bitstamp_async.cmxs"
+  exists_if = "bitstamp_async.cma"
 )
 
 package "top" (

@@ -18,6 +18,15 @@ true: debug, bin_annot, safe_string
 		 package(cstruct), \
 		 package(hex)
 
+<lib/bitstamp_async.*>: package(ppx_deriving.std), \
+		 package(ppx_deriving_yojson), \
+                 package(async), \
+                 thread, \
+		 package(cohttp.async), \
+		 package(nocrypto), \
+		 package(cstruct), \
+		 package(hex)
+
 <src/all_transactions.*>: package(ppx_deriving.std), \
 		 package(ppx_deriving_yojson), \
 		 package(lwt.ppx), \

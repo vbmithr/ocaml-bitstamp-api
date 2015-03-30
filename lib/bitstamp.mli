@@ -1,5 +1,3 @@
-val mk_uri : string -> Uri.t
-
 module Credentials : sig
   type t = private {
     id: string; key: string; secret: string;

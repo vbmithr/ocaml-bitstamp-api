@@ -1,6 +1,3 @@
-let base_uri = "https://www.bitstamp.net/api/"
-let mk_uri section = Uri.of_string @@ base_uri ^ section
-
 module Credentials = struct
   type t = {
     id: string; key: string; secret: string;
